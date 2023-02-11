@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 interface CircleProps {
@@ -29,6 +29,9 @@ const sayHello = (palyerObj: PlayerShape) => `Hello ${palyerObj.name} you are ${
 sayHello({ name: "mimi", age: 12 });
 // sayHello({ name: "mimi", age: 12, hello: 1 }); 이렇게하면 에러남
 export default function Circle({ bgColor, borderColor, text = "default text" }: CircleProps) {
+    const [counter, setCounter] = useState<number | string>(1);
+    setCounter(2);
+
     return (
         <div>
             <Container bgColor={bgColor} borderColor={borderColor ?? "#000"}>
