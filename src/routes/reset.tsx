@@ -38,6 +38,7 @@ footer, header, hgroup, main, menu, nav, section {
 *[hidden] {
     display: none;
 }
+a{text-decoration:none;}
 body {
   line-height: 1;
   font-family: 'Source Sans Pro', sans-serif;

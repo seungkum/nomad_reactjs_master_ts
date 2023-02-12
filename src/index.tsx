@@ -7,13 +7,14 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import ThemeFile from "./ThemeFile";
 import Coins from "./routes/Coins";
+import Coin from "./routes/Coin";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
         children: [
-            { index: true, element: <ThemeFile /> },
-            { path: "/:coinId", element: <Coins /> },
+            { index: true, element: <Coins /> },
+            { path: "/:coinId", element: <Coin /> },
             // { path: "/:coin" },
         ],
     },
