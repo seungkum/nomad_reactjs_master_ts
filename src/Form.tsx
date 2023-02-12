@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function Form() {
+export default function Form() {
     const [value, setValue] = useState("");
     const onChange = (event: React.FormEvent<HTMLInputElement>) => {
         const {
