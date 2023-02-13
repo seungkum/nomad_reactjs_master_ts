@@ -38,7 +38,7 @@ footer, header, hgroup, main, menu, nav, section {
 *[hidden] {
     display: none;
 }
-a{text-decoration:none;}
+a{text-decoration:none;color:inherit}
 body {
   font-weight: 300;
   font-family: 'Source Sans Pro', sans-serif;

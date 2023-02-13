@@ -4,12 +4,14 @@ import { ThemeProvider } from "styled-components";
 import App from "./App";
 import { darkTheme, lightTheme, theme } from "./theme";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import ThemeFile from "./ThemeFile";
 import Coins from "./routes/Coins";
 import Coin from "./routes/Coin";
 import Price from "./routes/Price";
 import Chart from "./routes/Chart";
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -27,12 +29,14 @@ const router = createBrowserRouter([
         ],
     },
 ]);
-
+const queryClient = new QueryClient();
 ReactDOM.render(
     <React.StrictMode>
-        <ThemeProvider theme={theme}>
-            <RouterProvider router={router} />
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+            <ThemeProvider theme={theme}>
+                <RouterProvider router={router} />
+            </ThemeProvider>
+        </QueryClientProvider>
     </React.StrictMode>,
     document.getElementById("root")
 );

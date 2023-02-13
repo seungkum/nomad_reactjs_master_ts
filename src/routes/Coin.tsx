@@ -2,13 +2,33 @@ import axios from "axios";
 import { info } from "console";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Outlet } from "react-router";
+import { useMatch } from "react-router-dom";
 
 const Title = styled.h1`
     font-size: 48px;
     color: ${(props) => props.theme.btnColor};
 `;
+const Loader = styled.span`
+    text-align: center;
+    display: block;
+`;
+
+const Container = styled.div`
+    padding: 0px 20px;
+    max-width: 480px;
+    margin: 0 auto;
+`;
+
+const Header = styled.header`
+    height: 15vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
+
 const Overview = styled.div`
     display: flex;
     justify-content: space-between;
@@ -30,22 +50,26 @@ const OverviewItem = styled.div`
 const Description = styled.p`
     margin: 20px 0px;
 `;
-const Loader = styled.span`
+
+const Tabs = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin: 25px 0px;
+    gap: 10px;
+`;
+
+const Tab = styled.span<{ isActive: boolean }>`
     text-align: center;
-    display: block;
-`;
-
-const Container = styled.div`
-    padding: 0px 20px;
-    max-width: 480px;
-    margin: 0 auto;
-`;
-
-const Header = styled.header`
-    height: 15vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 400;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 7px 0px;
+    border-radius: 10px;
+    color: ${(props) => (props.isActive ? props.theme.btnColor : props.theme.textColor)};
+    a {
+        display: block;
+    }
 `;
 
 interface RouteParams {
@@ -115,6 +139,9 @@ function Coin() {
     const { state } = useLocation() as RouteState;
     const [info, setInfo] = useState<InfoData>();
     const [priceInfo, setPriceInfo] = useState<PriceData>();
+    const priceMatch = useMatch("/:coinId/price"); // url에 있는지 확인요청 url에 있따면 그걸 말해줄거고 아니면 null
+    const chartMatch = useMatch("/:coinId/chart");
+
     console.log(coinId);
     useEffect(() => {
         (async () => {
@@ -166,6 +193,15 @@ function Coin() {
                             <span>{priceInfo?.max_supply}</span>
                         </OverviewItem>
                     </Overview>
+                    <Tabs>
+                        <Tab isActive={chartMatch !== null}>
+                            <Link to={`/${coinId}/chart`}>Chart</Link>
+                        </Tab>
+                        <Tab isActive={priceMatch !== null}>
+                            <Link to={`/${coinId}/price`}>Price</Link>
+                        </Tab>
+                    </Tabs>
+
                     <Outlet />
                 </>
             )}
