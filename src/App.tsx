@@ -4,16 +4,16 @@ import { css, createGlobalStyle } from "styled-components";
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "./theme";
 import { Reset } from "./routes/reset";
+import { useRecoilValue } from "recoil";
+import { isDarkAtom } from "./routes/atoms";
 
 export default function App() {
-    const [isDark, setIsDark] = useState(false);
-    const toggleDark = () => setIsDark((current) => !current);
-
+    const isDark = useRecoilValue(isDarkAtom);
     return (
         <>
             <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
                 <Reset />
-                <Outlet context={{ toggleDark }} />
+                <Outlet />
             </ThemeProvider>
         </>
     );

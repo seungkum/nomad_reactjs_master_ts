@@ -4,6 +4,8 @@ import { Link, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCoins } from "../api";
+import { useSetRecoilState } from "recoil";
+import { isDarkAtom } from "./atoms";
 const Container = styled.div`
     padding: 0px 20px;
     max-width: 480px;
@@ -63,10 +65,10 @@ interface CoinInterface {
     is_active: boolean;
     type: string;
 }
-interface ICoinsProps {
-    toggleDark: () => void;
-    // 이 코드는 우리가 toggleDark라는 함수를 받고자 한다고 말하는거 아무 argument도 받지 않고, void를 반환 void는 아무것도없다는뜻
-}
+// interface ICoinsProps {
+//     toggleBtn: () => void;
+//     // 이 코드는 우리가 toggleDark라는 함수를 받고자 한다고 말하는거 아무 argument도 받지 않고, void를 반환 void는 아무것도없다는뜻
+// }
 
 function Coins() {
     /*
@@ -90,13 +92,15 @@ function Coins() {
 
     const { isLoading, data: coins, error } = useQuery<CoinInterface[]>(["allCoins"], fetchCoins);
     console.log(coins);
-    const { toggleDark } = useOutletContext<ICoinsProps>();
-    console.log(toggleDark);
+    const setterFn = useSetRecoilState(isDarkAtom);
+    const toggleBtn = () => {
+        setterFn((set) => !set);
+    };
     return (
         <Container>
             <Header>
                 <Title>코인</Title>
-                <button onClick={toggleDark}> toggleDarkMode</button>
+                <button onClick={toggleBtn}> toggleDarkMode</button>
             </Header>
             {isLoading ? (
                 <Loader>Loading...</Loader>

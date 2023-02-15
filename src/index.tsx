@@ -10,6 +10,7 @@ import Coins from "./routes/Coins";
 import Coin from "./routes/Coin";
 import Price from "./routes/Price";
 import Chart from "./routes/Chart";
+import { RecoilRoot } from "recoil";
 interface IRouterProps {
     toggleDark: () => void;
     // 이 코드는 우리가 toggleDark라는 함수를 받고자 한다고 말하는거 아무 argument도 받지 않고, void를 반환 void는 아무것도없다는뜻
@@ -35,10 +36,12 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient();
 ReactDOM.render(
     <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <ReactQueryDevtools initialIsOpen={false} />
-            <RouterProvider router={router} />
-        </QueryClientProvider>
+        <RecoilRoot>
+            <QueryClientProvider client={queryClient}>
+                <ReactQueryDevtools initialIsOpen={false} />
+                <RouterProvider router={router} />
+            </QueryClientProvider>
+        </RecoilRoot>
     </React.StrictMode>,
     document.getElementById("root")
 );
