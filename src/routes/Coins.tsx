@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCoins } from "../api";
@@ -20,10 +20,11 @@ const Header = styled.header`
 const CoinsList = styled.ul``;
 
 const Coin = styled.li`
-    background-color: white;
-    color: ${(props) => props.theme.bgColor};
+    background-color: ${(props) => props.theme.cardBgColor};
+    color: ${(props) => props.theme.textColor};
     border-radius: 15px;
     margin-bottom: 10px;
+    border: 1px solid white;
     a {
         display: flex;
         align-items: center;
@@ -32,14 +33,14 @@ const Coin = styled.li`
     }
     &:hover {
         a {
-            color: ${(props) => props.theme.btnColor};
+            color: ${(props) => props.theme.accentColor};
         }
     }
 `;
 
 const Title = styled.h1`
     font-size: 48px;
-    color: ${(props) => props.theme.btnColor};
+    color: ${(props) => props.theme.accentColor};
 `;
 
 const Loader = styled.span`
@@ -61,6 +62,10 @@ interface CoinInterface {
     is_new: boolean;
     is_active: boolean;
     type: string;
+}
+interface ICoinsProps {
+    toggleDark: () => void;
+    // 이 코드는 우리가 toggleDark라는 함수를 받고자 한다고 말하는거 아무 argument도 받지 않고, void를 반환 void는 아무것도없다는뜻
 }
 
 function Coins() {
@@ -85,10 +90,13 @@ function Coins() {
 
     const { isLoading, data: coins, error } = useQuery<CoinInterface[]>(["allCoins"], fetchCoins);
     console.log(coins);
+    const { toggleDark } = useOutletContext<ICoinsProps>();
+    console.log(toggleDark);
     return (
         <Container>
             <Header>
                 <Title>코인</Title>
+                <button onClick={toggleDark}> toggleDarkMode</button>
             </Header>
             {isLoading ? (
                 <Loader>Loading...</Loader>

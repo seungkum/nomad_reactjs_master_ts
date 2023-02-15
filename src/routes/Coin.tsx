@@ -6,10 +6,12 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Outlet } from "react-router";
 import { useMatch } from "react-router-dom";
-
+import { useQuery } from "@tanstack/react-query";
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { Helmet } from "react-helmet";
 const Title = styled.h1`
     font-size: 48px;
-    color: ${(props) => props.theme.btnColor};
+    color: ${(props) => props.theme.accentColor};
 `;
 const Loader = styled.span`
     text-align: center;
@@ -66,7 +68,7 @@ const Tab = styled.span<{ isActive: boolean }>`
     background-color: rgba(0, 0, 0, 0.5);
     padding: 7px 0px;
     border-radius: 10px;
-    color: ${(props) => (props.isActive ? props.theme.btnColor : props.theme.textColor)};
+    color: ${(props) => (props.isActive ? props.theme.accentColor : props.theme.textColor)};
     a {
         display: block;
     }
@@ -134,13 +136,14 @@ interface PriceData {
 }
 
 function Coin() {
-    const [loading, setLoading] = useState(true);
     const { coinId } = useParams() as RouteParams;
     const { state } = useLocation() as RouteState;
-    const [info, setInfo] = useState<InfoData>();
-    const [priceInfo, setPriceInfo] = useState<PriceData>();
     const priceMatch = useMatch("/:coinId/price"); // url에 있는지 확인요청 url에 있따면 그걸 말해줄거고 아니면 null
     const chartMatch = useMatch("/:coinId/chart");
+    /**
+    const [loading, setLoading] = useState(true);
+    const [info, setInfo] = useState<InfoData>();
+    const [priceInfo, setPriceInfo] = useState<PriceData>();
 
     console.log(coinId);
     useEffect(() => {
@@ -157,11 +160,27 @@ function Coin() {
             console.log(infoData);
             console.log(priceData);
         })(); // 즉시실행함수 ()()
-    }, [coinId]);
+    }, [coinId]); */
+
+    const { isLoading: infoLoading, data: infoData } = useQuery(
+        ["info", coinId],
+        () => fetchCoinInfo(coinId!),
+        {
+            refetchInterval: 5000,
+        }
+    );
+    const { isLoading: tickersLoading, data: tickersData } = useQuery(["tickers", coinId], () =>
+        fetchCoinTickers(coinId!)
+    );
+    const loading = infoLoading || tickersLoading;
+
     return (
         <Container>
+            <Helmet>
+                <title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</title>
+            </Helmet>
             <Header>
-                <Title> {state?.name ? state.name : loading ? "Loading..." : info?.name}</Title>
+                <Title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</Title>
                 {/* state가 존재하면 name을 가져오고 아니면 Loading */}
             </Header>
             {loading ? (
@@ -171,28 +190,29 @@ function Coin() {
                     <Overview>
                         <OverviewItem>
                             <span>Rank:</span>
-                            <span>{info?.rank}</span>
+                            <span>{infoData?.rank}</span>
                         </OverviewItem>
                         <OverviewItem>
                             <span>Symbol:</span>
-                            <span>${info?.symbol}</span>
+                            <span>${infoData?.symbol}</span>
                         </OverviewItem>
                         <OverviewItem>
-                            <span>Open Source:</span>
-                            <span>{info?.open_source ? "Yes" : "No"}</span>
+                            <span>Price:</span>
+                            <span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
                         </OverviewItem>
                     </Overview>
-                    <Description>{info?.description}</Description>
+                    <Description>{infoData?.description}</Description>
                     <Overview>
                         <OverviewItem>
                             <span>Total Suply:</span>
-                            <span>{priceInfo?.total_supply}</span>
+                            <span>{tickersData?.total_supply}</span>
                         </OverviewItem>
                         <OverviewItem>
                             <span>Max Supply:</span>
-                            <span>{priceInfo?.max_supply}</span>
+                            <span>{tickersData?.max_supply}</span>
                         </OverviewItem>
                     </Overview>
+
                     <Tabs>
                         <Tab isActive={chartMatch !== null}>
                             <Link to={`/${coinId}/chart`}>Chart</Link>
@@ -202,7 +222,7 @@ function Coin() {
                         </Tab>
                     </Tabs>
 
-                    <Outlet />
+                    <Outlet context={{ coinId }} />
                 </>
             )}
         </Container>
