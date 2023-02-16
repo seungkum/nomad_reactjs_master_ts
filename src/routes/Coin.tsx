@@ -1,12 +1,18 @@
-import { useState } from "react";
+import axios from "axios";
+import { info } from "console";
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
-
+import { Outlet } from "react-router";
+import { useMatch } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { Helmet } from "react-helmet";
 const Title = styled.h1`
     font-size: 48px;
-    color: ${(props) => props.theme.btnColor};
+    color: ${(props) => props.theme.accentColor};
 `;
-
 const Loader = styled.span`
     text-align: center;
     display: block;
@@ -25,24 +31,209 @@ const Header = styled.header`
     align-items: center;
 `;
 
+const Overview = styled.div`
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 10px;
+`;
+const OverviewItem = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    span:first-child {
+        font-size: 10px;
+        font-weight: 400;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+`;
+const Description = styled.p`
+    margin: 20px 0px;
+`;
+
+const Tabs = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin: 25px 0px;
+    gap: 10px;
+`;
+
+const Tab = styled.span<{ isActive: boolean }>`
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 400;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 7px 0px;
+    border-radius: 10px;
+    color: ${(props) => (props.isActive ? props.theme.accentColor : props.theme.textColor)};
+    a {
+        display: block;
+    }
+`;
+
 interface RouteParams {
-    coinId: string;
+    coinId?: string;
 }
 interface RouteState {
     state: { name: string };
 }
+interface InfoData {
+    id: string;
+    name: string;
+    symbol: string;
+    rank: number;
+    is_new: boolean;
+    is_active: boolean;
+    type: string;
+    description: string;
+    message: string;
+    open_source: boolean;
+    started_at: string;
+    development_status: string;
+    hardware_wallet: boolean;
+    proof_type: string;
+    org_structure: string;
+    hash_algorithm: string;
+    first_data_at: string;
+    last_data_at: string;
+}
+
+interface PriceData {
+    id: string;
+    name: string;
+    symbol: string;
+    rank: number;
+    circulating_supply: number;
+    total_supply: number;
+    max_supply: number;
+    beta_value: number;
+    first_data_at: string;
+    last_updated: string;
+    quotes: {
+        USD: {
+            ath_date: string;
+            ath_price: number;
+            market_cap: number;
+            market_cap_change_24h: number;
+            percent_change_1h: number;
+            percent_change_1y: number;
+            percent_change_6h: number;
+            percent_change_7d: number;
+            percent_change_12h: number;
+            percent_change_15m: number;
+            percent_change_24h: number;
+            percent_change_30d: number;
+            percent_change_30m: number;
+            percent_from_price_ath: number;
+            price: number;
+            volume_24h: number;
+            volume_24h_change_24h: number;
+        };
+    };
+}
 
 function Coin() {
-    const [loading, setLoading] = useState(true);
-    const { coinId } = useParams();
+    const { coinId } = useParams() as RouteParams;
     const { state } = useLocation() as RouteState;
+    const priceMatch = useMatch("/:coinId/price"); // url에 있는지 확인요청 url에 있따면 그걸 말해줄거고 아니면 null
+    const chartMatch = useMatch("/:coinId/chart");
+    /**
+    const [loading, setLoading] = useState(true);
+    const [info, setInfo] = useState<InfoData>();
+    const [priceInfo, setPriceInfo] = useState<PriceData>();
+
+    console.log(coinId);
+    useEffect(() => {
+        (async () => {
+            const infoData = await axios
+                .get(`https://api.coinpaprika.com/v1/coins/${coinId}`)
+                .then((res) => res.data);
+            const priceData = await axios
+                .get(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
+                .then((res) => res.data);
+            setLoading(false);
+            setInfo(infoData);
+            setPriceInfo(priceData);
+            console.log(infoData);
+            console.log(priceData);
+        })(); // 즉시실행함수 ()()
+    }, [coinId]); */
+
+    const { isLoading: infoLoading, data: infoData } = useQuery(
+        ["info", coinId],
+        () => fetchCoinInfo(coinId!),
+        {
+            refetchInterval: 5000,
+        }
+    );
+    const { isLoading: tickersLoading, data: tickersData } = useQuery(["tickers", coinId], () =>
+        fetchCoinTickers(coinId!)
+    );
+    const loading = infoLoading || tickersLoading;
+
     return (
         <Container>
+            <Helmet>
+                <title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</title>
+            </Helmet>
             <Header>
-                <Title>{state?.name || "Loading..."}</Title>
+                <Title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</Title>
+                {/* state가 존재하면 name을 가져오고 아니면 Loading */}
             </Header>
-            {loading ? <Loader>Loading...</Loader> : null}
+            {loading ? (
+                <Loader>Loading...</Loader>
+            ) : (
+                <>
+                    <Overview>
+                        <OverviewItem>
+                            <span>Rank:</span>
+                            <span>{infoData?.rank}</span>
+                        </OverviewItem>
+                        <OverviewItem>
+                            <span>Symbol:</span>
+                            <span>${infoData?.symbol}</span>
+                        </OverviewItem>
+                        <OverviewItem>
+                            <span>Price:</span>
+                            <span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
+                        </OverviewItem>
+                    </Overview>
+                    <Description>{infoData?.description}</Description>
+                    <Overview>
+                        <OverviewItem>
+                            <span>Total Suply:</span>
+                            <span>{tickersData?.total_supply}</span>
+                        </OverviewItem>
+                        <OverviewItem>
+                            <span>Max Supply:</span>
+                            <span>{tickersData?.max_supply}</span>
+                        </OverviewItem>
+                    </Overview>
+
+                    <Tabs>
+                        <Tab isActive={chartMatch !== null}>
+                            <Link to={`/${coinId}/chart`}>Chart</Link>
+                        </Tab>
+                        <Tab isActive={priceMatch !== null}>
+                            <Link to={`/${coinId}/price`}>Price</Link>
+                        </Tab>
+                    </Tabs>
+
+                    <Outlet context={{ coinId }} />
+                </>
+            )}
         </Container>
     );
 }
 export default Coin;
+
+//
+/**
+ * 타입스크립트 네임가져오는법
+ * console.log(data)<- 해서 콘솔에서나온거 우클릭해서 전역 변수로 object 저장 클릭
+ * Object.keys(temp1).join() 하면 단위단으로 다 끊어나옴
+ * Object.values(temp1).map(v=>typeof v).join() 벨류값만나오는거
+ */

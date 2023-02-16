@@ -38,12 +38,13 @@ footer, header, hgroup, main, menu, nav, section {
 *[hidden] {
     display: none;
 }
-a{text-decoration:none;}
+a{text-decoration:none;color:inherit}
 body {
-  line-height: 1;
+  font-weight: 300;
   font-family: 'Source Sans Pro', sans-serif;
-  background-color: ${(props)=>props.theme.bgColor};
-  color:${(props)=>props.theme.textColor}
+  background-color:${(props) => props.theme.bgColor};
+  color:${(props) => props.theme.textColor};
+  line-height: 1.2;
 }
 menu, ol, ul {
   list-style: none;
