@@ -11,7 +11,7 @@ export default function App() {
     const isDark = useRecoilValue(isDarkAtom);
     return (
         <>
-            <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+            <ThemeProvider theme={!isDark ? darkTheme : lightTheme}>
                 <Reset />
                 <Outlet />
             </ThemeProvider>
